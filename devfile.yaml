@@ -1,10 +1,5 @@
 metadata:
   generateName: jh-pages-
-projects:
-  - name: jh-pages
-    source:
-      location: 'https://github.com/sunix/jh-pages'
-      type: git
 
 components:
 
