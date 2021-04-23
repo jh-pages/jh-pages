@@ -1,7 +1,6 @@
 package org.sunix.jhpages;
 
-import java.io.File;
-import java.util.Arrays;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -9,6 +8,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.lib.Ref;
 
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
@@ -23,27 +23,52 @@ public class GreetingMain implements QuarkusApplication {
     public int run(String... args) throws InvalidRemoteException, TransportException, GitAPIException {
         // push the current folder to github
         // jh-page ./folder/ username repo
-        Git.cloneRepository() //
-                .setURI("https://github.com/jh-pages/jh-pages") //
-                .setBranchesToClone(Arrays.asList("refs/heads/gh-pages"))
-                .setBranch("refs/heads/gh-pages")
-                .setDirectory(new File("/projects/jh-pages/target/test")) //
-                .call();
+
+        // check if gh-pages branch exist
+        if (ghPagesBranchExists("https://github.com/jh-pages/jh-pages")) {
+            System.out.println("Found gh-pages branch");
+        } else {
+            System.out.println("gh-pages branch not found");
+        }
+
+        /**
+         * Git gittt = Git.cloneRepository() //
+         * .setURI("https://github.com/jh-pages/jh-pages") // .setDirectory(new
+         * File("/projects/jh-pages/target/test")) // .call();
+         */
         // strategies:
         // - use jgit
-        // - call git installed in my system
 
         // Flow:
         // - check if repo exist, if not create it -> need github lib
         // - check if gh-pages activated in repo and if not ... create it.
         // - generate the git url to clone
         // - check if gh-pages branch exist
-        // - clone the project with only gh-pages (sparse checkout?)
+        // - clone the project with only gh-pages
         // - remove content
         // - copy content
         // - add, commit push
 
         return 0;
+    }
+
+    private boolean ghPagesBranchExists(String repo) {
+        try {
+            Collection<Ref> refs = Git.lsRemoteRepository() //
+                    .setRemote(repo) //
+                    .call();
+
+            for (Ref ref : refs) {
+                if ("refs/heads/gh-pages".equals(ref.getName())) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }
