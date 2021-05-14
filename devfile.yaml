@@ -53,8 +53,7 @@ commands:
       - workdir: '${CHE_PROJECTS_ROOT}/jh-pages'
         type: exec
         command: >-
-          read -p 'Enter your name [Eclipse Che]: ' name; name=${name:-'Eclipse
-          Che'}; set -o xtrace; mvn compile quarkus:dev -Dquarkus.args="$name"
+          read -p 'Enter the program args [jh-pages]: ' name; name=${name:-'jh-pages'}; set -o xtrace; mvn compile quarkus:dev -Dquarkus.args="$name"
         component: centos-quarkus-maven
   - name: Package Native
     actions:
@@ -69,8 +68,7 @@ commands:
       - workdir: '${CHE_PROJECTS_ROOT}/jh-pages/target'
         type: exec
         command: >-
-          read -p 'Enter your name [Eclipse Che]: ' name; name=${name:-'Eclipse
-          Che'}; set -o xtrace; ./jh-pages-1.0.0-SNAPSHOT-runner $name
+          read -p 'Enter the program args [jh-pages]: ' name; name=${name:-'Enter the program args [jh-pages jh-pages]: '}; set -o xtrace; ./jh-pages-1.0.0-SNAPSHOT-runner $name
         component: ubi-minimal
   - name: Attach remote debugger
     actions:
