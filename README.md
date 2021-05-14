@@ -8,7 +8,7 @@ should push the `./folder` to `username.github.io/repo` github pages.
 
 The flow to implement:
 
- - check if repo exist, if not create it -> need github lib
+ - check if repo exist, if not create it -> need github lib https://github.com/quarkiverse/quarkus-github-api
  - check if gh-pages activated in repo and if not ... create it.
  - generate the git url to clone
  - ✔️ check if gh-pages branch exist
