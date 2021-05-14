@@ -14,7 +14,7 @@ import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
 
 @QuarkusMain
-public class GreetingMain implements QuarkusApplication {
+public class JhPagesMain implements QuarkusApplication {
 
     @Inject
     GreetingService service;
