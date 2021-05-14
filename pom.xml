@@ -42,6 +42,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jgit</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.quarkiverse.githubapi</groupId>
+      <artifactId>quarkus-github-api</artifactId>
+      <version>1.128.1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

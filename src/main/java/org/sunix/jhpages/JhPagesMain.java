@@ -1,5 +1,6 @@
 package org.sunix.jhpages;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -9,27 +10,41 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Ref;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHUser;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
+import okhttp3.OkHttpClient;
 
 @QuarkusMain
 public class JhPagesMain implements QuarkusApplication {
 
     @Inject
-    GreetingService service;
+    GitHubService gitHubService;
 
     @Override
-    public int run(String... args) throws InvalidRemoteException, TransportException, GitAPIException {
+    public int run(String... args) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+
         // push the current folder to github
         // jh-page ./folder/ username repo
 
-        // check if gh-pages branch exist
-        if (ghPagesBranchExists("https://github.com/jh-pages/jh-pages")) {
-            System.out.println("Found gh-pages branch");
+        gitHubService.init("jh-pages/jh-pages");
+        if (gitHubService.checkRepoExist()) {
+            System.out.println("repo " + gitHubService.getRepoName() + " does exist");
         } else {
-            System.out.println("gh-pages branch not found");
+            System.out.println("repo " + gitHubService.getRepoName() + " does NOT exist");
         }
+
+        if (gitHubService.checkGhPagesBranchExist()) {
+            System.out.println("branch gh-pages for repo " + gitHubService.getRepoName() + " does exist");
+        } else {
+            System.out.println("branch gh-pages for repo " + gitHubService.getRepoName() + " does NOT exist");
+        }
+
 
         /**
          * Git gittt = Git.cloneRepository() //
@@ -52,7 +67,8 @@ public class JhPagesMain implements QuarkusApplication {
         return 0;
     }
 
-    private boolean ghPagesBranchExists(String repo) {
+
+    private boolean ghPagesBranchExistsGeneric(String repo) {
         try {
             Collection<Ref> refs = Git.lsRemoteRepository() //
                     .setRemote(repo) //
