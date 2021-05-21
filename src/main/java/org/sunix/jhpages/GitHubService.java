@@ -67,6 +67,7 @@ public class GitHubService {
 
     public void createRepo() {
         try {
+            // TODO split with (in TDD) String[] tokens = name.split("/");
             gitHub.createRepository(repoName).create();
         } catch (Exception e) {
             throw new RuntimeException(e);
