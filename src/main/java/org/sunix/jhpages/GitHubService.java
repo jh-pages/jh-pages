@@ -13,13 +13,18 @@ public class GitHubService {
 
     private String repoName;
     private GitHub gitHub;
+    private String ghPassword;
+    private String ghUser;
 
-    public void init(String repoName) {
-        this.repoName = repoName;
+    public void init() {
         try {
-            gitHub = GitHubBuilder //
+            GitHubBuilder gitHubBuilder = GitHubBuilder //
                     .fromEnvironment() //
-                    .withConnector(new OkHttpConnector(new OkHttpClient())).build();
+                    .withConnector(new OkHttpConnector(new OkHttpClient()));
+            if (ghUser != null) {
+                gitHubBuilder.withPassword(ghUser, ghPassword);
+            }
+            gitHub = gitHubBuilder.build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -42,6 +47,29 @@ public class GitHubService {
             return gitHub.getRepository(repoName).getBranch("gh-pages") != null;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public GitHubService withRepoName(String repoName) {
+        this.repoName = repoName;
+        return this;
+    }
+
+    public GitHubService withGhPassword(String ghPassword) {
+        this.ghPassword = ghPassword;
+        return this;
+    }
+
+    public GitHubService withGhUser(String ghUser) {
+        this.ghUser = ghUser;
+        return this;
+    }
+
+    public void createRepo() {
+        try {
+            gitHub.createRepository(repoName).create();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

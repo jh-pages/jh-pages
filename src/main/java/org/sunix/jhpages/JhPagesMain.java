@@ -18,7 +18,6 @@ import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
-import okhttp3.OkHttpClient;
 
 @QuarkusMain
 public class JhPagesMain implements QuarkusApplication {
@@ -29,14 +28,21 @@ public class JhPagesMain implements QuarkusApplication {
     @Override
     public int run(String... args) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 
+        String ghToken = System.getenv("MY_GH_TOKEN");
         // push the current folder to github
         // jh-page ./folder/ username repo
 
-        gitHubService.init("jh-pages/jh-pages");
+        gitHubService.withRepoName("sunix/mynewwebsite") //
+                .withGhPassword(ghToken) //
+                .withGhUser("sunix") //
+                .init();
+
         if (gitHubService.checkRepoExist()) {
             System.out.println("repo " + gitHubService.getRepoName() + " does exist");
         } else {
-            System.out.println("repo " + gitHubService.getRepoName() + " does NOT exist");
+            System.out.println("repo " + gitHubService.getRepoName() + " does NOT exist ... creating the repo !!!!");
+            gitHubService.createRepo();
+
         }
 
         if (gitHubService.checkGhPagesBranchExist()) {
@@ -44,7 +50,6 @@ public class JhPagesMain implements QuarkusApplication {
         } else {
             System.out.println("branch gh-pages for repo " + gitHubService.getRepoName() + " does NOT exist");
         }
-
 
         /**
          * Git gittt = Git.cloneRepository() //
@@ -66,7 +71,6 @@ public class JhPagesMain implements QuarkusApplication {
 
         return 0;
     }
-
 
     private boolean ghPagesBranchExistsGeneric(String repo) {
         try {
