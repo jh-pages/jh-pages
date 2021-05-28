@@ -10,11 +10,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Ref;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
-import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
@@ -28,27 +23,24 @@ public class JhPagesMain implements QuarkusApplication {
     @Override
     public int run(String... args) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 
-        String ghToken = System.getenv("MY_GH_TOKEN");
         // push the current folder to github
         // jh-page ./folder/ username repo
 
-        gitHubService.withRepoName("sunix/mynewwebsite") //
-                .withGhPassword(ghToken) //
-                .withGhUser("sunix") //
+        gitHubService.withFullRepoName("sunix/mynewwebsite") //
                 .init();
 
         if (gitHubService.checkRepoExist()) {
-            System.out.println("repo " + gitHubService.getRepoName() + " does exist");
+            System.out.println("repo " + gitHubService.getFullRepoName() + " does exist");
         } else {
-            System.out.println("repo " + gitHubService.getRepoName() + " does NOT exist ... creating the repo !!!!");
+            System.out.println("repo " + gitHubService.getFullRepoName() + " does NOT exist ... creating the repo !!!!");
             gitHubService.createRepo();
 
         }
 
         if (gitHubService.checkGhPagesBranchExist()) {
-            System.out.println("branch gh-pages for repo " + gitHubService.getRepoName() + " does exist");
+            System.out.println("branch gh-pages for repo " + gitHubService.getFullRepoName() + " does exist");
         } else {
-            System.out.println("branch gh-pages for repo " + gitHubService.getRepoName() + " does NOT exist");
+            System.out.println("branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");
         }
 
         /**
