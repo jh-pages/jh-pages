@@ -41,13 +41,11 @@ public class JhPagesMain implements QuarkusApplication {
             System.out.println("branch gh-pages for repo " + gitHubService.getFullRepoName() + " does exist");
         } else {
             System.out.println("branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");
+            gitHubService.createBranch("gh-pages");
         }
 
-        /**
-         * Git gittt = Git.cloneRepository() //
-         * .setURI("https://github.com/jh-pages/jh-pages") // .setDirectory(new
-         * File("/projects/jh-pages/target/test")) // .call();
-         */
+        
+         
         // strategies:
         // - use jgit
 

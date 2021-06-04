@@ -9,11 +9,13 @@ should push the `./folder` to `username.github.io/repo` github pages.
 The flow to implement:
 
  - ✔️ check if repo exist, if not create it -> need github lib https://github.com/quarkiverse/quarkus-github-api
-   - creating the repo is WIP
+   - ✔️ creating the repo
  - check if gh-pages activated in repo and if not ... create it.
  - generate the git url to clone
  - ✔️ check if gh-pages branch exist
- - clone the project with only gh-pages
+ - WIP clone the project with only gh-pages
+    - clone the project
+    - if gh-pages branch doesn't exist -> give a try with git CLI to see what we could do when the repo empty. 
  - remove content
  - copy content
  - add, commit push

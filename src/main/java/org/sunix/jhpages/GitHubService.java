@@ -1,7 +1,13 @@
 package org.sunix.jhpages;
 
+import java.io.File;
+
 import javax.enterprise.context.ApplicationScoped;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
@@ -14,6 +20,7 @@ public class GitHubService {
     private String repoName;
     private GitHub gitHub;
     private String repoOrgName;
+    private File cloneDirectory = new File("/projects/jh-pages/target/test");
 
     public void init() {
         try {
@@ -69,5 +76,25 @@ public class GitHubService {
     public String getFullRepoName() {
         return this.repoOrgName + "/" + this.repoName;
     }
+
+    
+    public void createBranch(String branchName) {
+
+
+
+        try {
+            Git git = Git.cloneRepository() //
+                    .setURI("https://github.com/"+ getFullRepoName()) //
+                    .setDirectory(cloneDirectory) //
+                    .call();
+
+ 
+           //  git.branchCreate().setName(branchName).call();
+           //  git.checkout()
+
+        } catch (Exception e) {
+            throw new RuntimeException("An error occured while trying cloning the repo " + branchName, e);
+        }
+	}
 
 }
