@@ -1,6 +1,14 @@
 package org.sunix.jhpages;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -83,30 +91,73 @@ public class GitHubService {
 
         try {
 
-            deleteDirectory(cloneDirectory);
+            deleteRecursif(cloneDirectory);
             Git git = Git.cloneRepository() //
                     .setURI("https://github.com/" //
-                    + getFullRepoName()) //
+                            + getFullRepoName()) //
                     .setDirectory(cloneDirectory) //
                     .call();
 
+            // only to be used if no gh-pages branch
             git.checkout().setOrphan(true).setName(branchName).call();
-            // git.checkout();
-            // deleteDirectory(cloneDirectory);
+            // remove all the content
+            deleteGitRepoContent(cloneDirectory);
+            // copy a directory content to be pushed
+            Arrays.stream( //
+                    new File("/projects/mywebsite").listFiles()) //
+                    .forEach(file -> {
+                        try {
+                            System.out.println("trying to copy " + file.getAbsolutePath() + " to "
+                                    + cloneDirectory.getAbsolutePath());
+                            copyDirectory(file.getAbsolutePath(),
+                                    cloneDirectory.getAbsolutePath() + "/" + file.getName());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+            // git add .
+            git.add().addFilepattern(".") //
+                    .call();
+            git.add().addFilepattern(".") //
+                    .setUpdate(true)//
+                    .call();
+            git.commit()//
+                    .setMessage("from jh-pages ...")//
+                    .call();
 
         } catch (Exception e) {
             throw new RuntimeException("An error occured while trying cloning the repo " + branchName, e);
         }
     }
 
-    boolean deleteDirectory(File directoryToBeDeleted) {
+    public static void copyDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation)
+            throws IOException {
+        Files.walk(Paths.get(sourceDirectoryLocation)).forEach(source -> {
+            Path destination = Paths.get(destinationDirectoryLocation,
+                    source.toString().substring(sourceDirectoryLocation.length()));
+            try {
+                Files.copy(source, destination);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    boolean deleteRecursif(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
-                deleteDirectory(file);
+                deleteRecursif(file);
             }
         }
         return directoryToBeDeleted.delete();
+    }
+
+    void deleteGitRepoContent(File gitRepoDirToBeDeleted) {
+        Arrays.stream( //
+                gitRepoDirToBeDeleted.listFiles()) //
+                .filter(file -> !file.getName().equals(".git")) //
+                .forEach(file -> deleteRecursif(file));
     }
 
 }
