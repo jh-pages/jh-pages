@@ -39,6 +39,7 @@ public class JhPagesMain implements QuarkusApplication {
 
         if (gitHubService.checkGhPagesBranchExist()) {
             System.out.println("branch gh-pages for repo " + gitHubService.getFullRepoName() + " does exist");
+            gitHubService.copyContentAndPush();
         } else {
             System.out.println("branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");
             gitHubService.createBranch("gh-pages");

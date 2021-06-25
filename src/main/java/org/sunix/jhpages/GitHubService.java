@@ -2,17 +2,15 @@ package org.sunix.jhpages;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
@@ -53,7 +51,7 @@ public class GitHubService {
 
     public boolean checkGhPagesBranchExist() {
         try {
-            return gitHub.getRepository(repoName).getBranch("gh-pages") != null;
+            return gitHub.getRepository(getFullRepoName()).getBranch("gh-pages") != null;
         } catch (Exception e) {
             return false;
         }
@@ -92,9 +90,12 @@ public class GitHubService {
         try {
 
             deleteRecursif(cloneDirectory);
+            UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
+                    System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
             Git git = Git.cloneRepository() //
                     .setURI("https://github.com/" //
                             + getFullRepoName()) //
+                    .setCredentialsProvider(credentialsProvider) //
                     .setDirectory(cloneDirectory) //
                     .call();
 
@@ -104,7 +105,7 @@ public class GitHubService {
             deleteGitRepoContent(cloneDirectory);
             // copy a directory content to be pushed
             Arrays.stream( //
-                    new File("/projects/mywebsite").listFiles()) //
+                    new File("/projects/jh-pages/mywebsite").listFiles()) //
                     .forEach(file -> {
                         try {
                             System.out.println("trying to copy " + file.getAbsolutePath() + " to "
@@ -124,10 +125,66 @@ public class GitHubService {
             git.commit()//
                     .setMessage("from jh-pages ...")//
                     .call();
+            git.push() //
+                    .setCredentialsProvider(credentialsProvider) //
+                    .call();
 
         } catch (Exception e) {
             throw new RuntimeException("An error occured while trying cloning the repo " + branchName, e);
         }
+    }
+
+    public void copyContentAndPush() {
+        try {
+
+            deleteRecursif(cloneDirectory);
+            UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
+                    System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
+            Git git = Git.cloneRepository() //
+                    .setURI("https://github.com/" //
+                            + getFullRepoName()) //
+                    .setCredentialsProvider(credentialsProvider) //
+                    .setDirectory(cloneDirectory) //
+                    .call();
+
+            // only to be used if no gh-pages branch
+            git.checkout() //
+                    .setCreateBranch(true) //
+                    .setStartPoint("origin/gh-pages") //
+                    .setName("gh-pages") //
+                    .call();
+            // remove all the content
+            deleteGitRepoContent(cloneDirectory);
+            // copy a directory content to be pushed
+            Arrays.stream( //
+                    new File("/projects/jh-pages/mywebsite").listFiles()) //
+                    .forEach(file -> {
+                        try {
+                            System.out.println("trying to copy " + file.getAbsolutePath() + " to "
+                                    + cloneDirectory.getAbsolutePath());
+                            copyDirectory(file.getAbsolutePath(),
+                                    cloneDirectory.getAbsolutePath() + "/" + file.getName());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+            // git add .
+            git.add().addFilepattern(".") //
+                    .call();
+            git.add().addFilepattern(".") //
+                    .setUpdate(true)//
+                    .call();
+            git.commit()//
+                    .setMessage("from jh-pages ...")//
+                    .call();
+            git.push() //
+                    .setCredentialsProvider(credentialsProvider) //
+                    .call();
+
+        } catch (Exception e) {
+            throw new RuntimeException("An error occured while trying do something in the repo gh-pages", e);
+        }
+
     }
 
     public static void copyDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation)
