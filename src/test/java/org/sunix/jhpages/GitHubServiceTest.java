@@ -17,7 +17,7 @@ public class GitHubServiceTest {
     @Test
     void should_return_repoName_without_username() {
         gitHubService.withFullRepoName("sunix/mywebsite");
-        assertEquals("mywebsite", gitHubService.getRepoName(),
+        assertEquals(gitHubService.getRepoName(), "mywebsite",
                 "the reponame should be the last part of the full repo name");
 
     }
