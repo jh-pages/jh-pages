@@ -1,27 +1,58 @@
 package org.sunix.jhpages;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Ref;
+import org.jline.terminal.Size;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.Display;
 
-import io.quarkus.runtime.QuarkusApplication;
-import io.quarkus.runtime.annotations.QuarkusMain;
+import picocli.CommandLine;
 
-@QuarkusMain
-public class JhPagesMain implements QuarkusApplication {
+@CommandLine.Command
+public class JhPagesMain implements Runnable {
 
     @Inject
     GitHubService gitHubService;
 
     @Override
-    public int run(String... args) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+    public void run() {
+
+        Display display = buildDisplay();
+
+        while (true) {
+            int i=0;
+            List<String> lines = Arrays.asList("hello-----" + i++, "world");
+            display.updateAnsi(lines, -1);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    protected Display buildDisplay() {
+        try {
+            Terminal terminal = TerminalBuilder.builder().dumb(true).build();
+
+            Display display = new Display(terminal, false);
+            Size size = terminal.getSize();
+            display.resize(size.getRows(), size.getColumns());
+            return display;
+        } catch (IOException e) {
+            throw new RuntimeException("error while building display", e);
+        }
+    }
+
+    private void experimentationRun() {
 
         // push the current folder to github
         // jh-page ./folder/ username repo
@@ -60,7 +91,6 @@ public class JhPagesMain implements QuarkusApplication {
         // - copy content
         // - add, commit push
 
-        return 0;
     }
 
     private boolean ghPagesBranchExistsGeneric(String repo) {
