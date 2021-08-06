@@ -27,12 +27,14 @@ public class JhPagesMain implements Runnable {
 
         Display display = buildDisplay();
 
+        char[] spinnerChars = new char[] { '-', '/', '|',  '\\' };
+        int i = 0;
         while (true) {
-            int i=0;
-            List<String> lines = Arrays.asList("hello-----" + i++, "world");
-            display.updateAnsi(lines, -1);
+            i ++;
+            List<String> lines = Arrays.asList(spinnerChars[i % spinnerChars.length] + " something ....");
+            display.updateAnsi(lines, 0);
             try {
-                Thread.sleep(2000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

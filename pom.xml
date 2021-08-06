@@ -17,6 +17,7 @@
     <quarkus.platform.version>2.0.3.Final</quarkus.platform.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <jline.version>3.9.0</jline.version>
+    <jansi.version>2.3.4</jansi.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -51,6 +52,11 @@
       <groupId>org.jline</groupId>
       <artifactId>jline</artifactId>
       <version>${jline.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.fusesource.jansi</groupId>
+      <artifactId>jansi</artifactId>
+      <version>${jansi.version}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkiverse.githubapi</groupId>
