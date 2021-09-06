@@ -13,11 +13,14 @@ public class Step {
     public Step(String initialText, Consumer<StepDisplay> stepRunner) {
         this.initialText = initialText;
         this.stepRunner = stepRunner;
-
     }
 
-	public void execute() {
-        stepRunner.accept(new StepDisplay(initialText));
-	}
+    public void execute() {
+        StepDisplay stepDisplay = new StepDisplay(initialText);
+        stepRunner.accept(stepDisplay);
+        if (!stepDisplay.isDone()) {
+            stepDisplay.done("Done !");
+        }
+    }
 
 }

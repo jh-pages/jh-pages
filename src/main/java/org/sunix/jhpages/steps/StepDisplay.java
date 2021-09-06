@@ -57,4 +57,8 @@ public class StepDisplay {
         }
     }
 
+	public boolean isDone() {
+		return done;
+	}
+
 }
