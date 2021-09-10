@@ -19,9 +19,13 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.Display;
 
 import picocli.CommandLine;
+import picocli.CommandLine.Parameters;
 
 @CommandLine.Command
 public class JhPagesMain implements Runnable {
+
+    @Parameters(index = "0", description = "Something like sunix/myrepo")
+    private String githubPagesProjectRef;
 
     @Inject
     GitHubService gitHubService;
@@ -29,32 +33,36 @@ public class JhPagesMain implements Runnable {
     @Override
     public void run() {
 
+        // get the input arguments
+
         // ⣽ checking if repo `blabla` exists
         // ✔️ repo `blabla` exists
         // if it doesn't exists
         // ✔️ repo `blabla` doesn't exist
         // ⣽ creating repo `blabla`
         // ✔️ repo `blabla` created
-        // startTask(new CheckIfRepoExistsTask(repourl))
+        // // startTask(new CheckIfRepoExistsTask(repourl))
 
         new Step("Create the github repo if needed", (StepDisplay display) -> {
-            display.updateText("doing something");
-            int i = 0;
-            while (i < 100) {
-                display.updateText("Creating Github repo ... " + i++ + "%");
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            gitHubService.withFullRepoName(githubPagesProjectRef) //
+                    .init();
+            if (gitHubService.checkRepoExist()) {
+                display.done("Repo " + gitHubService.getFullRepoName() + " already exist");
+                return;
             }
-            display.done("Done creating the github repo !");
+            display.updateText(
+                    "Repo " + gitHubService.getFullRepoName() + " does NOT exist ... creating the repo !!!!");
+            gitHubService.createRepo();
+            display.done("Repo " + gitHubService.getFullRepoName() + " created");
+
         }).execute();
 
-        new Step("Doing something else ...", (StepDisplay display) -> {
+        new Step("Doing something else ...", (StepDisplay display) ->
+
+        {
             int i = 0;
             while (i < 100) {
-                display.updateText("doing something else ..." + i++  + "%");
+                display.updateText("doing something else ..." + i++ + "%");
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -67,7 +75,7 @@ public class JhPagesMain implements Runnable {
         new Step("Doing something else without calling done() ...", (StepDisplay display) -> {
             int i = 0;
             while (i < 100) {
-                display.updateText("doing something else ...without calling done() " + i++  + "%");
+                display.updateText("doing something else ...without calling done() " + i++ + "%");
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -86,54 +94,6 @@ public class JhPagesMain implements Runnable {
         // - ✔️ copy content
         // - ✔️ add, commit push
 
-    }
-
-    private void experimentationRun2() {
-
-        Display display = buildDisplay();
-
-        char[] spinnerChars = new char[] { '⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷' };
-        int i = 0;
-        while (i < 50) {
-            i++;
-            List<String> lines = Arrays
-                    .asList(Ansi.ansi().fgBlue().a(spinnerChars[i % spinnerChars.length]).reset() + " something ....");
-            display.updateAnsi(lines, 0);
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println(Ansi.ansi().fgGreen().a("✔️").reset() + " something 1 done !");
-
-        i = 0;
-        while (i < 50) {
-            i++;
-            List<String> lines = Arrays.asList(
-                    Ansi.ansi().fgBlue().a(spinnerChars[i % spinnerChars.length]).reset() + " something 2 ....");
-            display.updateAnsi(lines, 0);
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println(Ansi.ansi().fgGreen().a("✔️").reset() + " something 2 done !");
-
-    }
-
-    protected Display buildDisplay() {
-        try {
-            Terminal terminal = TerminalBuilder.builder().dumb(true).build();
-
-            Display display = new Display(terminal, false);
-            Size size = terminal.getSize();
-            display.resize(size.getRows(), size.getColumns());
-            return display;
-        } catch (IOException e) {
-            throw new RuntimeException("error while building display", e);
-        }
     }
 
     private void experimentationRun() {
