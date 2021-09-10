@@ -64,6 +64,18 @@ public class JhPagesMain implements Runnable {
             display.done("Done doing something else !");
         }).execute();
 
+        new Step("Doing something else without calling done() ...", (StepDisplay display) -> {
+            int i = 0;
+            while (i < 100) {
+                display.updateText("doing something else ...without calling done() " + i++  + "%");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).execute();
+
         // - ✔️ generate the git url to clone
         // - ✔️ check if gh-pages branch exist - create a branch if not
         // - ✔️ clone the project with only gh-pages

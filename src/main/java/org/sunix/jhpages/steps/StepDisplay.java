@@ -2,6 +2,7 @@ package org.sunix.jhpages.steps;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,19 +21,19 @@ public class StepDisplay {
     String text;
     boolean done = false;
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    Display display = buildDisplay();
 
     public StepDisplay(String initialText) {
         text = initialText;
 
-        final Display display = buildDisplay();
         scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 List<String> lines = Arrays.asList(
-                        Ansi.ansi().fgBlue().a(spinnerChars[spinnerInt++ % spinnerChars.length]).reset() + " "+ text);
+                        Ansi.ansi().fgBlue().a(spinnerChars[spinnerInt++ % spinnerChars.length]).reset() + " " + text);
                 display.updateAnsi(lines, 0);
             }
-        },0L, 200L, TimeUnit.MILLISECONDS);
+        }, 0L, 200L, TimeUnit.MILLISECONDS);
     }
 
     public void updateText(String text) {
@@ -41,7 +42,9 @@ public class StepDisplay {
 
     public void done(String text) {
         scheduledExecutorService.shutdown();
+        display.updateAnsi(Collections.emptyList(), 0);
         System.out.println(Ansi.ansi().fgGreen().a("✔️").reset() + " " + text);
+        this.done = true;
     }
 
     protected Display buildDisplay() {
@@ -57,8 +60,8 @@ public class StepDisplay {
         }
     }
 
-	public boolean isDone() {
-		return done;
-	}
+    public boolean isDone() {
+        return done;
+    }
 
 }
