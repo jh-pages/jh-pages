@@ -93,8 +93,7 @@ public class GitHubService {
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
                     System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
             Git git = Git.cloneRepository() //
-                    .setURI("https://github.com/" //
-                            + getFullRepoName()) //
+                    .setURI(getRepoURL()) //
                     .setCredentialsProvider(credentialsProvider) //
                     .setDirectory(cloneDirectory) //
                     .call();
@@ -141,8 +140,7 @@ public class GitHubService {
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
                     System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
             Git git = Git.cloneRepository() //
-                    .setURI("https://github.com/" //
-                            + getFullRepoName()) //
+                    .setURI(getRepoURL()) //
                     .setCredentialsProvider(credentialsProvider) //
                     .setDirectory(cloneDirectory) //
                     .call();
@@ -215,6 +213,10 @@ public class GitHubService {
                 gitRepoDirToBeDeleted.listFiles()) //
                 .filter(file -> !file.getName().equals(".git")) //
                 .forEach(file -> deleteRecursif(file));
+    }
+
+    public String getRepoURL() {
+        return "https://github.com/" + getFullRepoName();
     }
 
 }

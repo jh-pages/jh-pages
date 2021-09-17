@@ -1,22 +1,14 @@
 package org.sunix.jhpages;
 
-import org.sunix.jhpages.steps.Step;
-import org.sunix.jhpages.steps.StepDisplay;
-
-import java.io.IOException;
-import java.util.Arrays;
+import java.io.File;
 import java.util.Collection;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
-import org.fusesource.jansi.Ansi;
-import org.jline.terminal.Size;
-import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
-import org.jline.utils.Display;
+import org.sunix.jhpages.steps.Step;
+import org.sunix.jhpages.steps.StepDisplay;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Parameters;
@@ -27,21 +19,20 @@ public class JhPagesMain implements Runnable {
     @Parameters(index = "0", description = "Something like sunix/myrepo")
     private String githubPagesProjectRef;
 
+    //@Parameters(index = "1", description = "The local folder to push to gh-pages")
+    private String folder;
+
     @Inject
     GitHubService gitHubService;
 
     @Override
     public void run() {
-
+        System.out.println(githubPagesProjectRef);
         // get the input arguments
 
-        // ⣽ checking if repo `blabla` exists
-        // ✔️ repo `blabla` exists
-        // if it doesn't exists
-        // ✔️ repo `blabla` doesn't exist
-        // ⣽ creating repo `blabla`
-        // ✔️ repo `blabla` created
-        // // startTask(new CheckIfRepoExistsTask(repourl))
+    }
+
+    public void runSave() {
 
         new Step("Create the github repo if needed", (StepDisplay display) -> {
             gitHubService.withFullRepoName(githubPagesProjectRef) //
@@ -53,23 +44,21 @@ public class JhPagesMain implements Runnable {
             display.updateText(
                     "Repo " + gitHubService.getFullRepoName() + " does NOT exist ... creating the repo !!!!");
             gitHubService.createRepo();
-            display.done("Repo " + gitHubService.getFullRepoName() + " created");
+            display.done("Repo " + gitHubService.getFullRepoName() + " (" + gitHubService.getRepoURL() + ") created");
 
         }).execute();
 
-        new Step("Doing something else ...", (StepDisplay display) ->
-
-        {
-            int i = 0;
-            while (i < 100) {
-                display.updateText("doing something else ..." + i++ + "%");
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        new Step("Create gh-pages branch exist if needed", (StepDisplay display) -> {
+            if (gitHubService.checkGhPagesBranchExist()) {
+                display.done("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " already exist");
+                gitHubService.copyContentAndPush();
+                return;
             }
-            display.done("Done doing something else !");
+
+            display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");
+            // gitHubService.createBranch("gh-pages");
+
+            display.done("Created branch gh-pages ! " + folder);//folder.getPath());
         }).execute();
 
         new Step("Doing something else without calling done() ...", (StepDisplay display) -> {
