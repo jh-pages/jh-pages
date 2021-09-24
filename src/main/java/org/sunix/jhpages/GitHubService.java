@@ -24,7 +24,7 @@ public class GitHubService {
     private String repoName;
     private GitHub gitHub;
     private String repoOrgName;
-    private File cloneDirectory = new File("/projects/jh-pages/target/test");
+    private File tempWorkingDir = createTempDir();
 
     public void init() {
         try {
@@ -35,6 +35,17 @@ public class GitHubService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private File createTempDir() {
+        File file;
+        try {
+            file = File.createTempFile("jh-pages-", "");
+        } catch (IOException e) {
+            throw new RuntimeException("an error occured while creating a temp dir", e);
+        }
+        file.mkdir();
+        return file;
     }
 
     public boolean checkRepoExist() {
@@ -66,12 +77,6 @@ public class GitHubService {
 
     public void createRepo() {
         try {
-            // TODO figure out why this is not working ....
-            // GHOrganization orgmy =
-            // gitHub.getUserPublicOrganizations("sunix").get("sunix");
-            // orgmy.createRepository(this.repoName).create();
-
-            // gitHub.createRepository(this.repoName).create();
             new GHCreateRepositoryBuilder(this.repoName, gitHub, "/user/repos") //
                     .autoInit(true) //
                     .defaultBranch("gh-pages") //
@@ -85,32 +90,32 @@ public class GitHubService {
         return this.repoOrgName + "/" + this.repoName;
     }
 
-    public void createBranch(String branchName) {
+    public void createBranch(String branchName, File folder) {
 
         try {
 
-            deleteRecursif(cloneDirectory);
+            deleteRecursif(tempWorkingDir);
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
                     System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
             Git git = Git.cloneRepository() //
                     .setURI(getRepoURL()) //
                     .setCredentialsProvider(credentialsProvider) //
-                    .setDirectory(cloneDirectory) //
+                    .setDirectory(tempWorkingDir) //
                     .call();
 
             // only to be used if no gh-pages branch
             git.checkout().setOrphan(true).setName(branchName).call();
             // remove all the content
-            deleteGitRepoContent(cloneDirectory);
+            deleteGitRepoContent(tempWorkingDir);
             // copy a directory content to be pushed
             Arrays.stream( //
-                    new File("/projects/jh-pages/mywebsite").listFiles()) //
+                    folder.listFiles()) //
                     .forEach(file -> {
                         try {
                             System.out.println("trying to copy " + file.getAbsolutePath() + " to "
-                                    + cloneDirectory.getAbsolutePath());
+                                    + tempWorkingDir.getAbsolutePath());
                             copyDirectory(file.getAbsolutePath(),
-                                    cloneDirectory.getAbsolutePath() + "/" + file.getName());
+                                    tempWorkingDir.getAbsolutePath() + "/" + file.getName());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -133,16 +138,16 @@ public class GitHubService {
         }
     }
 
-    public void copyContentAndPush() {
+    public void copyContentAndPush(File folder) {
         try {
 
-            deleteRecursif(cloneDirectory);
+            deleteRecursif(tempWorkingDir);
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
                     System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
             Git git = Git.cloneRepository() //
                     .setURI(getRepoURL()) //
                     .setCredentialsProvider(credentialsProvider) //
-                    .setDirectory(cloneDirectory) //
+                    .setDirectory(tempWorkingDir) //
                     .call();
 
             // only to be used if no gh-pages branch
@@ -152,16 +157,16 @@ public class GitHubService {
                     .setName("gh-pages") //
                     .call();
             // remove all the content
-            deleteGitRepoContent(cloneDirectory);
+            deleteGitRepoContent(tempWorkingDir);
             // copy a directory content to be pushed
             Arrays.stream( //
-                    new File("/projects/jh-pages/mywebsite").listFiles()) //
+                    folder.listFiles()) //
                     .forEach(file -> {
                         try {
                             System.out.println("trying to copy " + file.getAbsolutePath() + " to "
-                                    + cloneDirectory.getAbsolutePath());
+                                    + tempWorkingDir.getAbsolutePath());
                             copyDirectory(file.getAbsolutePath(),
-                                    cloneDirectory.getAbsolutePath() + "/" + file.getName());
+                                    tempWorkingDir.getAbsolutePath() + "/" + file.getName());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

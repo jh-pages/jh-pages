@@ -28,4 +28,4 @@ Every Friday 6pm CEST.
 Live stream: https://www.twitch.tv/happylivecoding
 Replay: https://www.youtube.com/playlist?list=PLAtUK_ilLV_0sutSI_rDW8_fmD1k2lux_
 
-TODO next: find out how to pass multiple args to the quarkus dev mode. have a look to https://quarkus.io/blog/introducing-command-mode/ thanks @lego
+TODO next: continue clean code githubservice
