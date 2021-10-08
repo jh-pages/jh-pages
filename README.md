@@ -28,4 +28,4 @@ Every Friday 6pm CEST.
 Live stream: https://www.twitch.tv/happylivecoding
 Replay: https://www.youtube.com/playlist?list=PLAtUK_ilLV_0sutSI_rDW8_fmD1k2lux_
 
-TODO next: continue clean code githubservice
+TODO next: check if createBranch and copyContentAndPush are the same and move these ones to the same method.

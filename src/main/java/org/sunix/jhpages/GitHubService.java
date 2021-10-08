@@ -10,6 +10,11 @@ import java.util.Arrays;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GitHub;
@@ -25,6 +30,9 @@ public class GitHubService {
     private GitHub gitHub;
     private String repoOrgName;
     private File tempWorkingDir = createTempDir();
+    private UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
+            System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
+    private Git git;
 
     public void init() {
         try {
@@ -92,19 +100,11 @@ public class GitHubService {
 
     public void createBranch(String branchName, File folder) {
 
+        Git git = getOrCloneGitProject();
+
+        // only to be used if no gh-pages branch
         try {
 
-            deleteRecursif(tempWorkingDir);
-            UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
-                    System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
-            Git git = Git.cloneRepository() //
-                    .setURI(getRepoURL()) //
-                    .setCredentialsProvider(credentialsProvider) //
-                    .setDirectory(tempWorkingDir) //
-                    .call();
-
-            // only to be used if no gh-pages branch
-            git.checkout().setOrphan(true).setName(branchName).call();
             // remove all the content
             deleteGitRepoContent(tempWorkingDir);
             // copy a directory content to be pushed
@@ -132,30 +132,41 @@ public class GitHubService {
             git.push() //
                     .setCredentialsProvider(credentialsProvider) //
                     .call();
-
         } catch (Exception e) {
-            throw new RuntimeException("An error occured while trying cloning the repo " + branchName, e);
+            throw new RuntimeException("An error occured while ....", e);
         }
+
     }
 
-    public void copyContentAndPush(File folder) {
+    public Git getOrCloneGitProject() {
+        if (git != null) {
+            return git;
+        }
         try {
-
             deleteRecursif(tempWorkingDir);
-            UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
-                    System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
-            Git git = Git.cloneRepository() //
+            UsernamePasswordCredentialsProvider credentialsProvider = getCredentialsProvider();
+            git = Git.cloneRepository() //
                     .setURI(getRepoURL()) //
                     .setCredentialsProvider(credentialsProvider) //
                     .setDirectory(tempWorkingDir) //
                     .call();
+            return git;
+        } catch (Exception e) {
+            throw new RuntimeException("An error occured while trying cloning the repo " + getRepoURL(), e);
+        }
+    }
+
+    private UsernamePasswordCredentialsProvider getCredentialsProvider() {
+        return credentialsProvider;
+    }
+
+    public void copyContentAndPush(File folder) {
+        Git git = getOrCloneGitProject();
+
+        try {
 
             // only to be used if no gh-pages branch
-            git.checkout() //
-                    .setCreateBranch(true) //
-                    .setStartPoint("origin/gh-pages") //
-                    .setName("gh-pages") //
-                    .call();
+
             // remove all the content
             deleteGitRepoContent(tempWorkingDir);
             // copy a directory content to be pushed
@@ -222,6 +233,26 @@ public class GitHubService {
 
     public String getRepoURL() {
         return "https://github.com/" + getFullRepoName();
+    }
+
+    public void checkoutGhPagesBranch() {
+        try {
+            getOrCloneGitProject().checkout() //
+                    .setCreateBranch(true) //
+                    .setStartPoint("origin/gh-pages") //
+                    .setName("gh-pages") //
+                    .call();
+        } catch (Exception e) {
+            throw new RuntimeException("An error occured while trying do something in the repo gh-pages", e);
+        }
+    }
+
+    public void checkoutOrphanGhPagesBranch() {
+        try {
+            git.checkout().setOrphan(true).setName("gh-pages").call();
+        } catch (Exception e) {
+            throw new RuntimeException("An error occured while trying do something in the repo gh-pages", e);
+        }
     }
 
 }

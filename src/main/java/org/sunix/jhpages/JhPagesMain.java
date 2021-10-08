@@ -29,7 +29,8 @@ public class JhPagesMain implements Runnable {
             gitHubService.withFullRepoName(githubPagesProjectRef) //
                     .init();
             if (gitHubService.checkRepoExist()) {
-                display.done("Repo " + gitHubService.getFullRepoName() + " already exist");
+                display.done("Repo " + gitHubService.getFullRepoName() + " (" + gitHubService.getRepoURL()
+                        + ") already exist. Skipping creation.");
                 return;
             }
             display.updateText(
@@ -40,11 +41,21 @@ public class JhPagesMain implements Runnable {
         }).execute();
 
         new Step("Create gh-pages branch exist if needed", (StepDisplay display) -> {
+            
             if (gitHubService.checkGhPagesBranchExist()) {
                 display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " already exist");
+
+                gitHubService.checkoutGhPagesBranch();
+
+
                 gitHubService.copyContentAndPush(folder);
+
                 return;
             }
+
+
+            gitHubService.checkoutOrphanGhPagesBranch();
+
 
             display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");
             gitHubService.createBranch("gh-pages", folder);
