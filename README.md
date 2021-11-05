@@ -28,4 +28,6 @@ Every Friday 6pm CEST.
 Live stream: https://www.twitch.tv/happylivecoding
 Replay: https://www.youtube.com/playlist?list=PLAtUK_ilLV_0sutSI_rDW8_fmD1k2lux_
 
-TODO next: check if createBranch and copyContentAndPush are the same and move these ones to the same method.
+TODO next:
+- also see if other projects using quarkus-github-api contains tests
+- if not, start "copying" wiremock tests from https://github.com/hub4j/github-api/blob/main/src/test/java/org/kohsuke/github/AbstractGitHubWireMockTest.java (because the tests artifacts are not published) 
