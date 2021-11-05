@@ -18,6 +18,7 @@
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <jline.version>3.9.0</jline.version>
     <jansi.version>2.3.4</jansi.version>
+    <quarkus-github-api.version>1.131.1</quarkus-github-api.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -61,7 +62,7 @@
     <dependency>
       <groupId>io.quarkiverse.githubapi</groupId>
       <artifactId>quarkus-github-api</artifactId>
-      <version>1.128.1</version>
+      <version>${quarkus-github-api.version}</version>
     </dependency>
   </dependencies>
   <build>
