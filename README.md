@@ -33,7 +33,8 @@ TODO next:
 - record github interactions
   - [ ] write the unit tests that will interact for real
   with github
-    - [x] testing create repo if needed
+    - [ ] testing create repo if needed
+      - [ ] WIP refactor to properly delete the repo before starting the test
     - [ ] test gh-pages branch creation
   - [ ] making sure that it works
   - [ ] record the interactions

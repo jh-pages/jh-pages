@@ -56,14 +56,6 @@ public class GitHubService {
         return file;
     }
 
-    public boolean checkRepoExist() {
-        try {
-            return gitHub.getRepository(getFullRepoName()) != null;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public String getRepoName() {
         return repoName;
     }
@@ -91,6 +83,24 @@ public class GitHubService {
                     .create();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public boolean checkRepoExist() {
+        try {
+            return gitHub.getRepository(getFullRepoName()) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void deleteRepo() {
+        try {
+            if (checkRepoExist()) {
+                gitHub.getRepository(getFullRepoName()).delete();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("An error occured while trying delete the repo " + getRepoURL(), e);
         }
     }
 
