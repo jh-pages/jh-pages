@@ -10,11 +10,6 @@ import java.util.Arrays;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.CheckoutConflictException;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRefNameException;
-import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
-import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GitHub;
@@ -60,7 +55,7 @@ public class GitHubService {
         return repoName;
     }
 
-    public boolean checkGhPagesBranchExist() {
+    public boolean checkRemoteGhPagesBranchExist() {
         try {
             return gitHub.getRepository(getFullRepoName()).getBranch("gh-pages") != null;
         } catch (Exception e) {
@@ -81,6 +76,7 @@ public class GitHubService {
                     .autoInit(true) //
                     .defaultBranch("gh-pages") //
                     .create();
+            getOrCloneGitProject();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -246,6 +242,15 @@ public class GitHubService {
     }
 
     public void checkoutGhPagesBranch() {
+        if (checkRemoteGhPagesBranchExist()) {
+            checkoutExistingGhPagesBranch();
+        } else {
+            checkoutOrphanGhPagesBranch();
+        }
+
+    }
+
+    private void checkoutExistingGhPagesBranch() {
         try {
             getOrCloneGitProject().checkout() //
                     .setCreateBranch(true) //
@@ -257,11 +262,23 @@ public class GitHubService {
         }
     }
 
-    public void checkoutOrphanGhPagesBranch() {
+    private void checkoutOrphanGhPagesBranch() {
         try {
-            git.checkout().setOrphan(true).setName("gh-pages").call();
+            git.//
+                    checkout().//
+                    setOrphan(true).//
+                    setName("gh-pages").//
+                    call();
         } catch (Exception e) {
-            throw new RuntimeException("An error occured while trying do something in the repo gh-pages", e);
+            throw new RuntimeException("An error occured while trying do checkout the orphan gh-pages", e);
+        }
+    }
+
+    public boolean checkLocalGhPagesBranchExist() {
+        try {
+            return "gh-pages".equals(git.getRepository().getBranch());
+        } catch (Exception e) {
+            throw new RuntimeException("An error occured while trying to check local gh-pages branches", e);
         }
     }
 

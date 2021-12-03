@@ -33,9 +33,10 @@ TODO next:
 - record github interactions
   - [ ] write the unit tests that will interact for real
   with github
-    - [ ] testing create repo if needed
-      - [ ] WIP refactor to properly delete the repo before starting the test
-    - [ ] test gh-pages branch creation
+    - [x] testing create repo if needed
+    - [x] test gh-pages branch creation
+    - [ ] test push new content
+    - [ ] test push changes on existing content
   - [ ] making sure that it works
   - [ ] record the interactions
   - [ ] mock it in our unit tests

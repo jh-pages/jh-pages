@@ -41,8 +41,7 @@ public class JhPagesMain implements Runnable {
         }).execute();
 
         new Step("Create gh-pages branch if needed", (StepDisplay display) -> {
-            
-            if (gitHubService.checkGhPagesBranchExist()) {
+            if (gitHubService.checkRemoteGhPagesBranchExist()) {
                 display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " already exist");
 
                 gitHubService.checkoutGhPagesBranch();
@@ -54,7 +53,7 @@ public class JhPagesMain implements Runnable {
             }
 
 
-            gitHubService.checkoutOrphanGhPagesBranch();
+            gitHubService.checkoutGhPagesBranch();
 
 
             display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");

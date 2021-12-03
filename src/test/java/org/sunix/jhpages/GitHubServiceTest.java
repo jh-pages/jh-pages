@@ -1,9 +1,8 @@
 package org.sunix.jhpages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Supplier;
 
@@ -29,18 +28,9 @@ public class GitHubServiceTest {
 
     @Test
     void should_createGHRepo() {
-
         String githubPagesProjectRef = "sunix/mywebsite3";
-        gitHubService.withFullRepoName(githubPagesProjectRef) //
-                .init();
-        // remove the repo first before starting the test
-        if (gitHubService.checkRepoExist()) {
-            gitHubService.deleteRepo();
-        }
-        assertFalseWith5Retries(() -> gitHubService.checkRepoExist(),
-                "The repo " + githubPagesProjectRef + " should not exist in the test context");
-
-        gitHubService.createRepo();
+        cleanUpRepoForTest(githubPagesProjectRef);
+        createRepoForTest(githubPagesProjectRef);
         assertTrue(gitHubService.checkRepoExist());
     }
 
@@ -58,16 +48,21 @@ public class GitHubServiceTest {
         assertFalse(supplier.get());
     }
 
-    // @Test
+    @Test
     void should_createGhpagesBranch() {
-        String githubPagesProjectRef = "sunix/mywebsite4";
-        gitHubService.withFullRepoName(githubPagesProjectRef) //
-                .init();
-        assertFalse(gitHubService.checkRepoExist(),
-                "The repo " + githubPagesProjectRef + " should not exist in the test context");
+        String githubPagesProjectRef = "sunix/mywebsite3";
+        cleanUpRepoForTest(githubPagesProjectRef);
+        createRepoForTest(githubPagesProjectRef);
 
-        gitHubService.createRepo();
-        assertTrue(gitHubService.checkRepoExist());
+        // making sure there is not gh-pages
+        assertFalse(gitHubService.checkRemoteGhPagesBranchExist(),
+                "after repo creation, gh-pages branch should not be created");
+
+        // create the gh-pages branch
+        gitHubService.checkoutGhPagesBranch();
+
+        assertTrue(gitHubService.checkLocalGhPagesBranchExist(),
+                "after checkout, gh-pages branch should have been created");
 
         // if (gitHubService.checkGhPagesBranchExist()) {
         // display.updateText("Branch gh-pages for repo " +
@@ -75,4 +70,21 @@ public class GitHubServiceTest {
 
         // gitHubService.checkoutGhPagesBranch();
     }
+
+    private void createRepoForTest(String githubPagesProjectRef) {
+        assertFalseWith5Retries(() -> gitHubService.checkRepoExist(),
+                "The repo " + githubPagesProjectRef + " should not exist in the test context");
+        gitHubService.createRepo();
+    }
+
+    private void cleanUpRepoForTest(String githubPagesProjectRef) {
+
+        gitHubService.withFullRepoName(githubPagesProjectRef) //
+                .init();
+        // remove the repo first before starting the test
+        if (gitHubService.checkRepoExist()) {
+            gitHubService.deleteRepo();
+        }
+    }
+
 }
