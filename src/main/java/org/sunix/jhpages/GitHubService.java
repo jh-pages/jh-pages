@@ -24,12 +24,13 @@ public class GitHubService {
     private String repoName;
     private GitHub gitHub;
     private String repoOrgName;
-    private File tempWorkingDir = createTempDir();
+    private File tempWorkingDir;
     private UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
             System.getenv("GITHUB_LOGIN"), System.getenv("GITHUB_PASSWORD"));
     private Git git;
 
     public void init() {
+        tempWorkingDir = createTempDir();
         try {
             this.gitHub = GitHubBuilder //
                     .fromEnvironment() //
@@ -241,7 +242,7 @@ public class GitHubService {
         return "https://github.com/" + getFullRepoName();
     }
 
-    public void checkoutGhPagesBranch() {
+    public void checkoutLocalGhPagesBranch() {
         if (checkRemoteGhPagesBranchExist()) {
             checkoutExistingGhPagesBranch();
         } else {

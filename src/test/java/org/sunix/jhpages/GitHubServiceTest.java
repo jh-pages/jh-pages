@@ -59,17 +59,33 @@ public class GitHubServiceTest {
                 "after repo creation, gh-pages branch should not be created");
 
         // create the gh-pages branch
-        gitHubService.checkoutGhPagesBranch();
+        gitHubService.checkoutLocalGhPagesBranch();
 
         assertTrue(gitHubService.checkLocalGhPagesBranchExist(),
                 "after checkout, gh-pages branch should have been created");
-
-        // if (gitHubService.checkGhPagesBranchExist()) {
-        // display.updateText("Branch gh-pages for repo " +
-        // gitHubService.getFullRepoName() + " already exist");
-
-        // gitHubService.checkoutGhPagesBranch();
     }
+
+    @Test
+    void shouldPushContent(){
+        // use the folder test/resources/mywebsite/ and push it
+        // initialise the repo and clone/create gh-branch it if needed in a tmp folder
+        String githubPagesProjectRef = "sunix/mywebsite3";
+        cleanUpRepoForTest(githubPagesProjectRef);
+        createRepoForTest(githubPagesProjectRef);
+        assertFalse(gitHubService.checkRemoteGhPagesBranchExist(),
+                "after repo creation, gh-pages branch should not be created");
+        gitHubService.checkoutLocalGhPagesBranch();
+
+
+        // remove all the existing content but .git from the temp folder
+        // copy the content of test/resources/mywebsite/ to the temp folder
+        // add/commit/push
+
+        // verify that the content is available in gh-pages
+
+    }
+
+
 
     private void createRepoForTest(String githubPagesProjectRef) {
         assertFalseWith5Retries(() -> gitHubService.checkRepoExist(),

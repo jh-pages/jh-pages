@@ -4,7 +4,7 @@
 jh-pages ./folder/ username repo
 ```
 
-should push the `./folder` to `username.github.io/repo` github pages. 
+should push the `./folder` to `username.github.io/repo` github pages. (creating the repo and the branch if needed, and keeping the git history)
 
 The flow to implement:
 
@@ -35,7 +35,7 @@ TODO next:
   with github
     - [x] testing create repo if needed
     - [x] test gh-pages branch creation
-    - [ ] test push new content
+    - [ ] test push new content -> test failing ATM
     - [ ] test push changes on existing content
   - [ ] making sure that it works
   - [ ] record the interactions

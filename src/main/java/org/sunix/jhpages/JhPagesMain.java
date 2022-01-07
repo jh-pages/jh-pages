@@ -44,7 +44,7 @@ public class JhPagesMain implements Runnable {
             if (gitHubService.checkRemoteGhPagesBranchExist()) {
                 display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " already exist");
 
-                gitHubService.checkoutGhPagesBranch();
+                gitHubService.checkoutLocalGhPagesBranch();
 
 
                 gitHubService.copyContentAndPush(folder);
@@ -53,7 +53,7 @@ public class JhPagesMain implements Runnable {
             }
 
 
-            gitHubService.checkoutGhPagesBranch();
+            gitHubService.checkoutLocalGhPagesBranch();
 
 
             display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");
