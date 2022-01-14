@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ public class GitHubServiceTest {
 
     @Test
     void should_createGHRepo() {
-        String githubPagesProjectRef = "sunix/mywebsite3";
+        String githubPagesProjectRef = "sunix/mywebsite-createrepo";
         cleanUpRepoForTest(githubPagesProjectRef);
         createRepoForTest(githubPagesProjectRef);
         assertTrue(gitHubService.checkRepoExist());
@@ -50,7 +51,7 @@ public class GitHubServiceTest {
 
     @Test
     void should_createGhpagesBranch() {
-        String githubPagesProjectRef = "sunix/mywebsite3";
+        String githubPagesProjectRef = "sunix/mywebsite-createbranch";
         cleanUpRepoForTest(githubPagesProjectRef);
         createRepoForTest(githubPagesProjectRef);
 
@@ -69,7 +70,7 @@ public class GitHubServiceTest {
     void shouldPushContent(){
         // use the folder test/resources/mywebsite/ and push it
         // initialise the repo and clone/create gh-branch it if needed in a tmp folder
-        String githubPagesProjectRef = "sunix/mywebsite3";
+        String githubPagesProjectRef = "sunix/mywebsite-push";
         cleanUpRepoForTest(githubPagesProjectRef);
         createRepoForTest(githubPagesProjectRef);
         assertFalse(gitHubService.checkRemoteGhPagesBranchExist(),
@@ -80,6 +81,10 @@ public class GitHubServiceTest {
         // remove all the existing content but .git from the temp folder
         // copy the content of test/resources/mywebsite/ to the temp folder
         // add/commit/push
+        String resourceName = "mywebsite";
+        ClassLoader classLoader = getClass().getClassLoader();
+        File folder = new File(classLoader.getResource(resourceName).getFile());
+        gitHubService.copyContentAndPush(folder);
 
         // verify that the content is available in gh-pages
 

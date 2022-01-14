@@ -31,6 +31,7 @@ public class GitHubService {
 
     public void init() {
         tempWorkingDir = createTempDir();
+        git = null;
         try {
             this.gitHub = GitHubBuilder //
                     .fromEnvironment() //
@@ -265,7 +266,7 @@ public class GitHubService {
 
     private void checkoutOrphanGhPagesBranch() {
         try {
-            git.//
+            getOrCloneGitProject().//
                     checkout().//
                     setOrphan(true).//
                     setName("gh-pages").//
