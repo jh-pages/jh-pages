@@ -36,7 +36,7 @@ TODO next:
     - [x] testing create repo if needed
     - [x] test gh-pages branch creation
     - [x] test push new content
-    - [ ] test push changes on existing content should override existing gh-pages
+    - [ ] WIP test push changes on existing content should override existing gh-pages
     - [ ] test pull existing content in a folder.
   - [ ] making sure that it works
   - [ ] record the interactions

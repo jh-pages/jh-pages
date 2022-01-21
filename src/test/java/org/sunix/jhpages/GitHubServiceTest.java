@@ -5,6 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -67,7 +72,17 @@ public class GitHubServiceTest {
     }
 
     @Test
-    void shouldPushContent(){
+    void shouldOverrideContent() {
+        // having that
+        assertEqualsRetry1min(200, () -> {
+            return get("https://sunix.github.io/mywebsite-push/index.html");
+        }, "should be pushed and return code is");
+
+        // gitHubService.checkout
+    }
+
+    @Test
+    void shouldPushContent() throws IOException {
         // use the folder test/resources/mywebsite/ and push it
         // initialise the repo and clone/create gh-branch it if needed in a tmp folder
         String githubPagesProjectRef = "sunix/mywebsite-push";
@@ -76,7 +91,6 @@ public class GitHubServiceTest {
         assertFalse(gitHubService.checkRemoteGhPagesBranchExist(),
                 "after repo creation, gh-pages branch should not be created");
         gitHubService.checkoutLocalGhPagesBranch();
-
 
         // remove all the existing content but .git from the temp folder
         // copy the content of test/resources/mywebsite/ to the temp folder
@@ -87,10 +101,38 @@ public class GitHubServiceTest {
         gitHubService.copyContentAndPush(folder);
 
         // verify that the content is available in gh-pages
+        // check that https://sunix.github.io/mywebsite-push/index.html is published
 
+        assertEqualsRetry1min(200, () -> {
+            return get("https://sunix.github.io/mywebsite-push/index.html");
+        }, "should be pushed and return code is");
     }
 
+    private Integer get(String urlstr) {
+        try {
+            URL url = new URL(urlstr);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.connect();
+            return con.getResponseCode();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    private void assertEqualsRetry1min(int expectedValue, Supplier<Integer> supplier, String errorMessage) {
+        for (int i = 0; i < 60; i++) {
+            if (!supplier.get().equals(expectedValue)) {
+                try {
+                    Thread.sleep(1000);
+                } finally {
+                    continue;
+                }
+            }
+            break;
+        }
+        assertEquals(expectedValue, supplier.get(), "should be pushed and return code is");
+    }
 
     private void createRepoForTest(String githubPagesProjectRef) {
         assertFalseWith5Retries(() -> gitHubService.checkRepoExist(),
