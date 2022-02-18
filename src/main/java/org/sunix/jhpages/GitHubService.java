@@ -120,8 +120,6 @@ public class GitHubService {
                     folder.listFiles()) //
                     .forEach(file -> {
                         try {
-                            System.out.println("trying to copy " + file.getAbsolutePath() + " to "
-                                    + tempWorkingDir.getAbsolutePath());
                             copyDirectory(file.getAbsolutePath(),
                                     tempWorkingDir.getAbsolutePath() + "/" + file.getName());
                         } catch (IOException e) {
@@ -182,8 +180,6 @@ public class GitHubService {
                     folder.listFiles()) //
                     .forEach(file -> {
                         try {
-                            System.out.println("trying to copy " + file.getAbsolutePath() + " to "
-                                    + tempWorkingDir.getAbsolutePath());
                             copyDirectory(file.getAbsolutePath(),
                                     tempWorkingDir.getAbsolutePath() + "/" + file.getName());
                         } catch (IOException e) {
