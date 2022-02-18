@@ -1,122 +1,108 @@
-apiVersion: 1.0.0
-
+schemaVersion: 2.1.0
 metadata:
-  generateName: jh-pages-
-
+  generateName: jh-pages
+  namespace: sunix-che
+projects:
+  - git:
+      remotes:
+        origin: 'https://github.com/jh-pages/jh-pages.git'
+    name: jh-pages
 components:
-
-  - id: eamodio/gitlens/latest
-    type: chePlugin
-  - id: github/vscode-pull-request-github/latest
-    type: chePlugin
-  - id: donjayamanne/githistory/latest
-    type: chePlugin
-  - id: redhat/quarkus-java11/latest
-    type: chePlugin
-
-
-  - alias: git
-    image: sunix/git-devtools
-    mountSources: true
-    args:
-      - sleep
-      - infinity
-    memoryLimit: 64M
-    type: dockerimage
-
-  - alias: centos-quarkus-maven
-    image: 'quay.io/quarkus/centos-quarkus-maven:21.1.0-java11'
-    type: dockerimage
-    mountSources: true
-    memoryLimit: 4G
-    command:
-      - tail
-    args:
-      - '-f'
-      - /dev/null
-    endpoints:
-      - name: debug
-        port: 5005
-        attributes:
-          public: 'false'
-    volumes:
-      - name: m2
-        containerPath: /home/user/.m2
-      - name: dotconfig
-        containerPath: /home/user/.config
-    env:
-      - value: >-
-          -XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
-          -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4
-          -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true
-          -Xms20m -Djava.security.egd=file:/dev/./urandom -Duser.home=/home/user
-        name: JAVA_OPTS
-      - value: $(JAVA_OPTS)
-        name: MAVEN_OPTS
-
-  - alias: ubi-minimal
-    image: >-
-      registry.access.redhat.com/ubi8/ubi-minimal@sha256:fdfb0770bff33e0f97d78583efd68b546a19d0a4b0ac23eef25ef261bca3e975
-    type: dockerimage
-    mountSources: true
-    command:
-      - tail
-    args:
-      - '-f'
-      - /dev/null
-    memoryLimit: 32M
-
+  - container:
+      args:
+        - sleep
+        - infinity
+      image: sunix/git-devtools
+      memoryLimit: 64M
+      mountSources: true
+      sourceMapping: /projects
+    name: git
+  - attributes:
+      app.kubernetes.io/name: tools
+      che-theia.eclipse.org/vscode-extensions:
+        - 'https://download.jboss.org/jbosstools/vscode/stable/vscode-quarkus/vscode-quarkus-1.7.0-437.vsix'
+        - 'https://download.jboss.org/jbosstools/static/jdt.ls/stable/java-0.82.0-369.vsix'
+        - 'https://download.jboss.org/jbosstools/vscode/stable/vscode-microprofile/vscode-microprofile-0.1.1-48.vsix'
+        - 'https://download.jboss.org/jbosstools/vscode/3rdparty/vscode-java-debug/vscode-java-debug-0.26.0.vsix'
+        - 'https://open-vsx.org/api/vscjava/vscode-java-test/0.28.1/file/vscjava.vscode-java-test-0.28.1.vsix'
+      che-theia.eclipse.org/vscode-preferences:
+        java.server.launchMode: Standard
+    container:
+      args:
+        - sh
+        - '-c'
+        - '${PLUGIN_REMOTE_ENDPOINT_EXECUTABLE}'
+      endpoints:
+        - exposure: none
+          name: debug
+          protocol: tcp
+          targetPort: 5005
+        - exposure: public
+          name: hello-greeting-endpoint
+          path: /hello/greeting/che-user
+          protocol: http
+          targetPort: 8080
+      env:
+        - name: QUARKUS_HTTP_HOST
+          value: 0.0.0.0
+        - name: PLUGIN_REMOTE_ENDPOINT_EXECUTABLE
+          value: /remote-endpoint/plugin-remote-endpoint
+        - name: THEIA_PLUGINS
+          value: 'local-dir:///plugins/sidecars/tools'
+      image: 'quay.io/devfile/universal-developer-image:ubi8-0e189d9'
+      memoryLimit: 4G
+      mountSources: true
+      sourceMapping: /projects
+      volumeMounts:
+        - name: m2
+          path: /home/user/.m2
+        - name: remote-endpoint
+          path: /remote-endpoint
+        - name: plugins
+          path: /plugins
+    name: tools
+  - container:
+      args:
+        - '-f'
+        - /dev/null
+      command:
+        - tail
+      image: registry.access.redhat.com/ubi8/ubi-minimal
+      memoryLimit: 64M
+      mountSources: true
+      sourceMapping: /projects
+    name: ubi-minimal
+  - name: m2
+    volume:
+      size: 1G
 commands:
-
-  - name: Package
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/jh-pages'
-        type: exec
-        command: mvn package
-        component: centos-quarkus-maven
-  - name: Run Quarkus continuous test
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/jh-pages'
-        type: exec
-        command: 'mvn quarkus:test'
-        component: centos-quarkus-maven
-  - name: Start Development mode (Hot reload + debug)
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/jh-pages'
-        type: exec
-        command: ./dev/start-dev-mode.sh
-        component: centos-quarkus-maven
-
-  - name: Package Native
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/jh-pages'
-        type: exec
-        command: >-
-          mvn package -Dnative -Dmaven.test.skip
-          -Dquarkus.native.native-image-xmx=2G
-        component: centos-quarkus-maven
-
-  - name: Start Native
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/jh-pages/target'
-        type: exec
-        command: >-
-          read -p 'Enter the program args [jh-pages]: ' name; name=${name:-'Enter the program args [jh-pages jh-pages]: '}; set -o xtrace; ./jh-pages-1.0.0-SNAPSHOT-runner $name
-        component: ubi-minimal
-
-  - name: Attach remote debugger
-    actions:
-      - referenceContent: |
-          {
-            "version": "0.2.0",
-            "configurations": [
-              {
-                "type": "java",
-                "request": "attach",
-                "name": "Attach to Remote Quarkus App",
-                "hostName": "localhost",
-                "port": 5005
-              }
-            ]
-          }
-        type: vscode-launch
+  - exec:
+      commandLine: mvn package
+      component: tools
+      label: Package
+      workingDir: '${PROJECTS_ROOT}/jh-pages'
+    id: package
+  - exec:
+      commandLine: 'mvn quarkus:test'
+      component: tools
+      label: Run Quarkus continuous test
+      workingDir: '${PROJECTS_ROOT}/jh-pages'
+    id: run-quarkus-continuous-test
+  - exec:
+      commandLine: ./dev/start-dev-mode.sh
+      component: tools
+      label: Start Development mode (Hot reload + debug)
+      workingDir: '${PROJECTS_ROOT}/jh-pages'
+    id: start-development-mode-hot-reload--debug
+  - exec:
+      commandLine: mvn package -Dnative -Dmaven.test.skip -Dquarkus.native.native-image-xmx=2G
+      component: tools
+      label: Package Native
+      workingDir: '${PROJECTS_ROOT}/jh-pages'
+    id: package-native
+  - exec:
+      commandLine: 'read -p ''Enter the program args [jh-pages]: '' name; name=${name:-''Enter the program args [jh-pages jh-pages]: ''}; set -o xtrace; ./jh-pages-1.0.0-SNAPSHOT-runner $name'
+      component: ubi-minimal
+      label: Start Native
+      workingDir: '${PROJECTS_ROOT}/jh-pages/target'
+    id: start-native
