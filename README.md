@@ -1,7 +1,7 @@
 # jh-pages
 
 ```
-jh-pages ./folder/ username repo
+jh-pages username/repo ./folder
 ```
 
 should push the `./folder` to `username.github.io/repo` github pages. (creating the repo and the branch if needed, and keeping the git history)
@@ -27,17 +27,3 @@ Every Friday 6pm CEST.
 
 Live stream: https://www.twitch.tv/happylivecoding
 Replay: https://www.youtube.com/playlist?list=PLAtUK_ilLV_0sutSI_rDW8_fmD1k2lux_
-
-TODO next:
-- testing wiremock
-- record github interactions
-  - [ ] write the unit tests that will interact for real
-  with github
-    - [x] testing create repo if needed
-    - [x] test gh-pages branch creation
-    - [x] test push new content
-    - [ ] WIP test push changes on existing content should override existing gh-pages
-    - [ ] test pull existing content in a folder.
-  - [ ] making sure that it works
-  - [ ] record the interactions
-  - [ ] mock it in our unit tests
