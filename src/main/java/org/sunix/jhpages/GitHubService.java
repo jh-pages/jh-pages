@@ -280,4 +280,17 @@ public class GitHubService {
         }
     }
 
+    public String getGhPagesUrl() {
+        try {
+            if (gitHub.getRepository(getFullRepoName()).hasPages()) {
+                return "cool";
+            }
+            // gitHub.getRepository(getFullRepoName()).pages
+
+        } catch (Exception e) {
+        }
+
+        return "";
+    }
+
 }

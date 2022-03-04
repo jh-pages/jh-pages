@@ -47,7 +47,12 @@ public class JhPagesMain implements Runnable {
 
         new Step("Push gh-pages branch", (StepDisplay display) -> {
             gitHubService.copyContentAndPush(folder);
-            display.done("Pushed content " + folder);// folder.getPath());
+            display.done("Pushed content from " + folder);// folder.getPath());
+        }).execute();
+
+        new Step("Display url", (StepDisplay display) -> {
+            String ghPagesUrl = gitHubService.getGhPagesUrl();
+            display.done("The site is available at the URL: " + ghPagesUrl);// folder.getPath());
         }).execute();
 
         // - ✔️ generate the git url to clone
