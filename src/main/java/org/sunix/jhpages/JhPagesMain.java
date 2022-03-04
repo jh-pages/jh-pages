@@ -40,28 +40,15 @@ public class JhPagesMain implements Runnable {
 
         }).execute();
 
-        new Step("Create gh-pages branch if needed", (StepDisplay display) -> {
-            if (gitHubService.checkRemoteGhPagesBranchExist()) {
-                display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " already exist");
-
-                gitHubService.checkoutLocalGhPagesBranch();
-
-
-                gitHubService.copyContentAndPush(folder);
-
-                return;
-            }
-
-
+        new Step("Checkout gh-pages branch", (StepDisplay display) -> {
             gitHubService.checkoutLocalGhPagesBranch();
-
-
-            display.updateText("Branch gh-pages for repo " + gitHubService.getFullRepoName() + " does NOT exist");
-            gitHubService.createBranch("gh-pages", folder);
-
-            display.done("Created branch gh-pages ! " + folder);// folder.getPath());
+            display.done("Branch gh-pages checked out " + folder);// folder.getPath());
         }).execute();
 
+        new Step("Push gh-pages branch", (StepDisplay display) -> {
+            gitHubService.copyContentAndPush(folder);
+            display.done("Pushed content " + folder);// folder.getPath());
+        }).execute();
 
         // - ✔️ generate the git url to clone
         // - ✔️ check if gh-pages branch exist - create a branch if not
