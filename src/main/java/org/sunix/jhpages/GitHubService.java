@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
+import org.kohsuke.github.GHPages;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
@@ -283,9 +284,8 @@ public class GitHubService {
     public String getGhPagesUrl() {
         try {
             if (gitHub.getRepository(getFullRepoName()).hasPages()) {
-                return "cool";
+                return GHPages.read(gitHub, gitHub.getRepository(getFullRepoName()).getOwnerName(), gitHub.getRepository(getFullRepoName()).getName()).getHtmlUrl().toString();
             }
-            // gitHub.getRepository(getFullRepoName()).pages
 
         } catch (Exception e) {
         }
